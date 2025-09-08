@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cad.cadproject.CADDrawing.CADDrawingMapper">
+
+
+    <select id="getCadModelList" resultType="map">
+        SELECT MODEL_ID
+             , MODEL_NM
+             , BUILDING_NM
+             , MODEL_DESC
+             , VERSION_INFO
+             , MODEL_SIZE
+             , FILE_PATH 
+        FROM CAD_MODEL
+    </select>
+
+ 
+<insert id="insertCadModel">
+    INSERT INTO CAD_MODEL (
+        MODEL_ID,
+        MODEL_NM,
+        BUILDING_NM,
+        MODEL_DESC,
+        VERSION_INFO,
+        MODEL_SIZE,
+        FILE_PATH
+    )
+    VALUES (
+        (
+            'MD' || LPAD(
+                NVL(
+                    (SELECT MAX(TO_NUMBER(SUBSTR(MODEL_ID, 3))) FROM CAD_MODEL),
+                    0
+                ) + 1,
+                4,
+                '0'
+            )
+        ),
+        #{MODEL_NM},
+        #{BUILDING_NM},
+        #{MODEL_DESC},
+        #{VERSION_INFO},
+        #{MODEL_SIZE}
+        , #{FILE_PATH}
+    )
+</insert>
+
+
+<update id="updateCadModel">
+    UPDATE CAD_MODEL
+    SET MODEL_NM = #{MODEL_NM},
+        BUILDING_NM = #{BUILDING_NM},
+        MODEL_DESC = #{MODEL_DESC},
+        VERSION_INFO = #{VERSION_INFO},
+        MODEL_SIZE = #{MODEL_SIZE} ,
+        FILE_PATH = #{FILE_PATH}  
+    WHERE MODEL_ID = #{MODEL_ID}
+</update>
+
+
+
+
+    <delete id="deleteCadModel">
+        DELETE FROM CAD_MODEL
+        WHERE MODEL_ID = #{modelId}
+    </delete>
+    
+
+    
+
+</mapper>
