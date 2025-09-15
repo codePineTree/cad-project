@@ -288,7 +288,7 @@ public class CADAdminController {
     }
 
     @GetMapping("/checkConvertedFiles")
-    public ResponseEntity<?> checkConvertedFiles() {
+    public ResponseEntity<?> checkConvertedFiles(@RequestParam(value = "fileName", required = false) String fileName) {
         try {
             File tempDir = new File(TEMP_DIR);
             System.out.println("🔍 변환된 파일 체크 시작: " + TEMP_DIR);
@@ -298,7 +298,32 @@ public class CADAdminController {
                 return ResponseEntity.ok().body(Map.of("hasFiles", false));
             }
             
-            // .dxf 파일들 찾기
+            // fileName 파라미터가 있으면 특정 파일만 체크
+            if (fileName != null && !fileName.isEmpty()) {
+                String targetDxfName = fileName.replaceAll("(?i)\\.dwf$", ".dxf");
+                File targetFile = new File(tempDir, targetDxfName);
+                
+                System.out.println("🎯 특정 파일 체크: " + targetDxfName);
+                
+                if (targetFile.exists()) {
+                    if (isFileCompletelyGenerated(targetFile)) {
+                        System.out.println("✅ 요청된 파일 완성됨: " + targetDxfName);
+                        return ResponseEntity.ok().body(Map.of(
+                            "hasFiles", true,
+                            "fileName", targetFile.getName(),
+                            "fileSize", targetFile.length()
+                        ));
+                    } else {
+                        System.out.println("⏳ 요청된 파일이 아직 생성 중: " + targetDxfName);
+                        return ResponseEntity.ok().body(Map.of("hasFiles", false, "generating", true));
+                    }
+                } else {
+                    System.out.println("❌ 요청된 파일 없음: " + targetDxfName);
+                    return ResponseEntity.ok().body(Map.of("hasFiles", false));
+                }
+            }
+            
+            // fileName 파라미터가 없으면 기존 로직 (가장 최근 파일)
             File[] dxfFiles = tempDir.listFiles((dir, name) -> 
                 name.toLowerCase().endsWith(".dxf"));
             
@@ -315,7 +340,6 @@ public class CADAdminController {
                 }
                 
                 if (latestFile != null) {
-                    // 파일 완성도 검증
                     if (isFileCompletelyGenerated(latestFile)) {
                         System.out.println("✅ 완전한 변환 파일 발견: " + latestFile.getName());
                         return ResponseEntity.ok().body(Map.of(
