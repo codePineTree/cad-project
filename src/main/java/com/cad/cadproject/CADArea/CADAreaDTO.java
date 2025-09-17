@@ -1,5 +1,6 @@
 package com.cad.cadproject.CADArea;
 
+import java.util.Date;
 import java.util.List;
 
 public class CADAreaDTO {
@@ -11,9 +12,9 @@ public class CADAreaDTO {
     private String areaDesc;
     private String areaColor;
     private String areaStyle;
-    private String regDdtm;
+    private Date regDdtm;        // String → Date 변경
     private String regId;
-    private String lstAdjDdtm;
+    private Date lstAdjDdtm;     // String → Date 변경
     private String lstAdjId;
     
     // 구역 좌표 리스트
@@ -36,9 +37,9 @@ public class CADAreaDTO {
         private int pointOrder;
         private double x;
         private double y;
-        private String regDdtm;
+        private Date regDdtm;        // String → Date 변경
         private String regId;
-        private String lstAdjDdtm;
+        private Date lstAdjDdtm;     // String → Date 변경
         private String lstAdjId;
 
         // 생성자
@@ -91,11 +92,11 @@ public class CADAreaDTO {
             this.y = y;
         }
 
-        public String getRegDdtm() {
+        public Date getRegDdtm() {       // String → Date 변경
             return regDdtm;
         }
 
-        public void setRegDdtm(String regDdtm) {
+        public void setRegDdtm(Date regDdtm) {   // String → Date 변경
             this.regDdtm = regDdtm;
         }
 
@@ -107,11 +108,11 @@ public class CADAreaDTO {
             this.regId = regId;
         }
 
-        public String getLstAdjDdtm() {
+        public Date getLstAdjDdtm() {    // String → Date 변경
             return lstAdjDdtm;
         }
 
-        public void setLstAdjDdtm(String lstAdjDdtm) {
+        public void setLstAdjDdtm(Date lstAdjDdtm) {  // String → Date 변경
             this.lstAdjDdtm = lstAdjDdtm;
         }
 
@@ -181,11 +182,11 @@ public class CADAreaDTO {
         this.areaStyle = areaStyle;
     }
 
-    public String getRegDdtm() {
+    public Date getRegDdtm() {          // String → Date 변경
         return regDdtm;
     }
 
-    public void setRegDdtm(String regDdtm) {
+    public void setRegDdtm(Date regDdtm) {      // String → Date 변경
         this.regDdtm = regDdtm;
     }
 
@@ -197,11 +198,11 @@ public class CADAreaDTO {
         this.regId = regId;
     }
 
-    public String getLstAdjDdtm() {
+    public Date getLstAdjDdtm() {       // String → Date 변경
         return lstAdjDdtm;
     }
 
-    public void setLstAdjDdtm(String lstAdjDdtm) {
+    public void setLstAdjDdtm(Date lstAdjDdtm) { // String → Date 변경
         this.lstAdjDdtm = lstAdjDdtm;
     }
 

@@ -5,19 +5,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 <mapper namespace="com.cad.cadproject.CADArea.CADAreaMapper">
 
-    <!-- 구역 기본 정보 저장 -->
-    <insert id="insertCadArea" parameterType="com.cad.cadproject.CADArea.CADAreaDTO">
-        INSERT INTO CAD_AREA (
-            AREA_ID,
-            MODEL_ID,
-            AREA_NM,
-            AREA_DESC,
-            AREA_COLOR,
-            AREA_SIZE,
-            AREA_STYLE,
-            REG_DDTM,
-            REG_ID
-        ) VALUES (
+<insert id="insertCadArea" parameterType="com.cad.cadproject.CADArea.CADAreaDTO">
+    INSERT INTO CAD_AREA (
+        AREA_ID,
+        MODEL_ID,
+        AREA_NM,
+        AREA_DESC,
+        AREA_COLOR,
+        AREA_SIZE,
+        AREA_STYLE
+    ) VALUES (
+        (
             'AR' || LPAD(
                 NVL(
                     (SELECT MAX(TO_NUMBER(SUBSTR(AREA_ID, 3))) FROM CAD_AREA),
@@ -25,17 +23,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 ) + 1,
                 4,
                 '0'
-            ),
-            #{modelId},
-            #{areaNm},
-            #{areaDesc},
-            #{areaColor},
-            #{areaSize},
-            #{areaStyle},
-            SYSDATE,
-            'SYSTEM'
-        )
-    </insert>
+            )
+        ),
+        #{modelId},
+        #{areaNm},
+        #{areaDesc},
+        #{areaColor},
+        #{areaSize},
+        #{areaStyle}
+    )
+</insert>
 
  <!-- 좌표 정보 저장 -->
     <insert id="insertCadAreaCoord" parameterType="com.cad.cadproject.CADArea.CADAreaDTO$CoordinatePoint">
@@ -81,11 +78,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             AREA_SIZE as areaSize,
             AREA_DESC as areaDesc,
             AREA_COLOR as areaColor,
-            AREA_STYLE as areaStyle,
-            REG_DDTM as regDdtm,
-            REG_ID as regId,
-            LST_ADJ_DDTM as lstAdjDdtm,
-            LST_ADJ_ID as lstAdjId
+            AREA_STYLE as areaStyle
         FROM CAD_AREA 
         WHERE MODEL_ID = #{modelId}
         ORDER BY REG_DDTM DESC
@@ -98,11 +91,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             AREA_ID as areaId,
             POINT_ORDER as pointOrder,
             X_COORD as x,
-            Y_COORD as y,
-            REG_DDTM as regDdtm,
-            REG_ID as regId,
-            LST_ADJ_DDTM as lstAdjDdtm,
-            LST_ADJ_ID as lstAdjId
+            Y_COORD as y
         FROM CAD_AREA_COORD 
         WHERE AREA_ID = #{areaId}
         ORDER BY POINT_ORDER ASC
