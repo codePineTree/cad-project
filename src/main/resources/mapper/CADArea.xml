@@ -1,10 +1,151 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.cad.cadproject.CADArea.CADAreaMapper">
 
+    <!-- 구역 기본 정보 저장 -->
+    <insert id="insertCadArea" parameterType="com.cad.cadproject.CADArea.CADAreaDTO">
+        INSERT INTO CAD_AREA (
+            AREA_ID,
+            MODEL_ID,
+            AREA_NM,
+            AREA_DESC,
+            AREA_COLOR,
+            AREA_SIZE,
+            AREA_STYLE,
+            REG_DDTM,
+            REG_ID
+        ) VALUES (
+            'AR' || LPAD(
+                NVL(
+                    (SELECT MAX(TO_NUMBER(SUBSTR(AREA_ID, 3))) FROM CAD_AREA),
+                    0
+                ) + 1,
+                4,
+                '0'
+            ),
+            #{modelId},
+            #{areaNm},
+            #{areaDesc},
+            #{areaColor},
+            #{areaSize},
+            #{areaStyle},
+            SYSDATE,
+            'SYSTEM'
+        )
+    </insert>
 
+ <!-- 좌표 정보 저장 -->
+    <insert id="insertCadAreaCoord" parameterType="com.cad.cadproject.CADArea.CADAreaDTO$CoordinatePoint">
+        INSERT INTO CAD_AREA_COORD (
+            COORD_ID,
+            AREA_ID,
+            POINT_ORDER,
+            X_COORD,
+            Y_COORD,
+            REG_DDTM,
+            REG_ID
+        ) VALUES (
+            'CO' || LPAD(
+                NVL(
+                    (SELECT MAX(TO_NUMBER(SUBSTR(COORD_ID, 3))) FROM CAD_AREA_COORD),
+                    0
+                ) + 1,
+                6,
+                '0'
+            ),
+            #{areaId},
+            #{pointOrder},
+            #{x},
+            #{y},
+            SYSDATE,
+            'SYSTEM'
+        )
+    </insert>
+
+    <!-- 마지막 생성된 구역 ID 조회 -->
+    <select id="getLastInsertedAreaId" resultType="String">
+        SELECT MAX(AREA_ID) 
+        FROM CAD_AREA 
+        WHERE AREA_ID LIKE 'AR%'
+    </select>
+
+  <!-- 모델별 구역 목록 조회 -->
+    <select id="selectAreasByModelId" parameterType="String" resultType="com.cad.cadproject.CADArea.CADAreaDTO">
+        SELECT 
+            AREA_ID as areaId,
+            MODEL_ID as modelId,
+            AREA_NM as areaNm,
+            AREA_SIZE as areaSize,
+            AREA_DESC as areaDesc,
+            AREA_COLOR as areaColor,
+            AREA_STYLE as areaStyle,
+            REG_DDTM as regDdtm,
+            REG_ID as regId,
+            LST_ADJ_DDTM as lstAdjDdtm,
+            LST_ADJ_ID as lstAdjId
+        FROM CAD_AREA 
+        WHERE MODEL_ID = #{modelId}
+        ORDER BY REG_DDTM DESC
+    </select>
+
+    <!-- 구역별 좌표 목록 조회 -->
+    <select id="selectCoordsByAreaId" parameterType="String" resultType="com.cad.cadproject.CADArea.CADAreaDTO$CoordinatePoint">
+        SELECT 
+            COORD_ID as coordId,
+            AREA_ID as areaId,
+            POINT_ORDER as pointOrder,
+            X_COORD as x,
+            Y_COORD as y,
+            REG_DDTM as regDdtm,
+            REG_ID as regId,
+            LST_ADJ_DDTM as lstAdjDdtm,
+            LST_ADJ_ID as lstAdjId
+        FROM CAD_AREA_COORD 
+        WHERE AREA_ID = #{areaId}
+        ORDER BY POINT_ORDER ASC
+    </select>    
+
+ <!-- 구역별 좌표 삭제 -->
+    <delete id="deleteCoordsByAreaId" parameterType="String">
+        DELETE FROM CAD_AREA_COORD 
+        WHERE AREA_ID = #{areaId}
+    </delete>
+
+    <!-- 구역 삭제 -->
+    <delete id="deleteAreaById" parameterType="String">
+        DELETE FROM CAD_AREA 
+        WHERE AREA_ID = #{areaId}
+    </delete>
+
+    <!-- 구역별 좌표 개수 조회 -->
+    <select id="getCoordCountByAreaId" parameterType="String" resultType="int">
+        SELECT COUNT(*) 
+        FROM CAD_AREA_COORD 
+        WHERE AREA_ID = #{areaId}
+    </select>
+
+    <!-- 모델별 구역 개수 조회 -->
+    <select id="getAreaCountByModelId" parameterType="String" resultType="int">
+        SELECT COUNT(*) 
+        FROM CAD_AREA 
+        WHERE MODEL_ID = #{modelId}
+    </select>
+
+   <!-- 구역 정보 수정 -->
+    <update id="updateArea" parameterType="com.cad.cadproject.CADArea.CADAreaDTO">
+        UPDATE CAD_AREA 
+        SET 
+            AREA_NM = #{areaNm},
+            AREA_DESC = #{areaDesc},
+            AREA_COLOR = #{areaColor},
+            AREA_STYLE = #{areaStyle},
+            LST_ADJ_DDTM = SYSDATE,
+            LST_ADJ_ID = 'SYSTEM'
+        WHERE AREA_ID = #{areaId}
+    </update>    
+    
 
 </mapper>
