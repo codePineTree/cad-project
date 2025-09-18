@@ -68,30 +68,6 @@ public class CADAreaController {
         }
     }
 
-    /**
-     * 구역 삭제 API
-     * @param areaId 삭제할 구역 ID
-     * @return 삭제 결과
-     */
-    @DeleteMapping("/delete/{areaId}")
-    public ResponseEntity<Map<String, Object>> deleteArea(@PathVariable String areaId) {
-        Map<String, Object> response = new HashMap<>();
-        
-        try {
-            cadAreaService.deleteAreaWithCoordinates(areaId);
-            
-            response.put("success", true);
-            response.put("message", "구역이 성공적으로 삭제되었습니다.");
-            
-            return ResponseEntity.ok(response);
-            
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "구역 삭제 중 오류가 발생했습니다: " + e.getMessage());
-            
-            return ResponseEntity.badRequest().body(response);
-        }
-    }
 
     /**
      * 구역 정보 수정 API

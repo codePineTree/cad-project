@@ -18,16 +18,14 @@ public class CADAreaService {
             String drawingStatus = areaData.getDrawingStatus();
 
             if ("I".equals(drawingStatus)) {
-                // === 1. 구역 기본 정보 Insert ===
+                // === INSERT 로직 (기존 그대로) ===
                 cadAreaMapper.insertCadArea(areaData);
-
-                // === 2. 생성된 구역 ID 조회 ===
                 String newAreaId = cadAreaMapper.getLastInsertedAreaId();
                 if (newAreaId == null || newAreaId.trim().isEmpty()) {
                     throw new RuntimeException("AREA_ID 생성 실패");
                 }
-
-                // === 3. 좌표 저장 ===
+                
+                // 좌표 저장
                 List<CADAreaDTO.CoordinatePoint> coordinates = areaData.getCoordinates();
                 if (coordinates != null && !coordinates.isEmpty()) {
                     for (int i = 0; i < coordinates.size(); i++) {
@@ -37,19 +35,33 @@ public class CADAreaService {
                         cadAreaMapper.insertCadAreaCoord(coord);
                     }
                 }
-
                 return newAreaId;
+                
+            } else if ("D".equals(drawingStatus)) {
+                // === DELETE 로직 (기존 deleteAreaWithCoordinates 내용) ===
+                String areaId = areaData.getAreaId();
+                if (areaId == null || areaId.trim().isEmpty()) {
+                    throw new RuntimeException("삭제할 AREA_ID가 없습니다");
+                }
+                
+                // 1. 좌표들 먼저 삭제 (FK 제약조건 때문에)
+                cadAreaMapper.deleteCoordsByAreaId(areaId);
+                
+                // 2. 구역 삭제
+                cadAreaMapper.deleteAreaById(areaId);
+                
+                return areaId; // 삭제된 ID 반환
+                
             } else {
-                System.out.println("⚠️ DrawingStatus가 'I'가 아니므로 Insert 생략: " + drawingStatus);
+                System.out.println("⚠️ 지원하지 않는 DrawingStatus: " + drawingStatus);
                 return null;
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("구역 저장 중 오류 발생: " + e.getMessage(), e);
+            throw new RuntimeException("구역 처리 중 오류 발생: " + e.getMessage(), e);
         }
     }
-
 
     /**
      * 모델 ID로 구역 목록 조회 (좌표 포함)
@@ -83,23 +95,6 @@ public class CADAreaService {
         }
     }
 
-    /**
-     * 구역 삭제 (좌표도 함께 삭제)
-     * @param areaId 삭제할 구역 ID
-     */
-    @Transactional
-    public void deleteAreaWithCoordinates(String areaId) {
-        try {
-            // 1. 좌표들 먼저 삭제 (FK 제약조건 때문에)
-            cadAreaMapper.deleteCoordsByAreaId(areaId);
-
-            // 2. 구역 삭제
-            cadAreaMapper.deleteAreaById(areaId);
-
-        } catch (Exception e) {
-            throw new RuntimeException("구역 삭제 중 오류가 발생했습니다: " + e.getMessage(), e);
-        }
-    }
 
     /**
      * 구역 정보 수정 (좌표는 수정하지 않음)
