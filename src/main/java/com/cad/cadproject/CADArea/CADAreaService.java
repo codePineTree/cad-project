@@ -12,86 +12,44 @@ public class CADAreaService {
     @Autowired
     private CADAreaMapper cadAreaMapper;
 
-    /**
-     * 구역과 좌표를 함께 저장하는 트랜잭션 메서드
-     * @param areaData 구역 기본 정보 + 좌표 배열
-     * @return 저장된 구역 ID
-     */
     @Transactional
     public String saveAreaWithCoordinates(CADAreaDTO areaData) {
         try {
-            // === 입력 데이터 검증 및 로그 출력 ===
-            System.out.println("=== 구역 저장 시작 - 입력 데이터 검증 ===");
-            System.out.println("modelId: [" + areaData.getModelId() + "] (길이: " + 
-                (areaData.getModelId() != null ? areaData.getModelId().length() : "null") + ")");
-            System.out.println("areaNm: [" + areaData.getAreaNm() + "] (길이: " + 
-                (areaData.getAreaNm() != null ? areaData.getAreaNm().length() : "null") + ")");
-            System.out.println("areaDesc: [" + areaData.getAreaDesc() + "] (길이: " + 
-                (areaData.getAreaDesc() != null ? areaData.getAreaDesc().length() : "null") + ")");
-            System.out.println("areaColor: [" + areaData.getAreaColor() + "] (길이: " + 
-                (areaData.getAreaColor() != null ? areaData.getAreaColor().length() : "null") + ")");
-            System.out.println("areaSize: [" + areaData.getAreaSize() + "] (타입: double)");
-            System.out.println("areaStyle: [" + areaData.getAreaStyle() + "] (길이: " + 
-                (areaData.getAreaStyle() != null ? areaData.getAreaStyle().length() : "null") + ")");
-            
-            List<CADAreaDTO.CoordinatePoint> coordinates = areaData.getCoordinates();
-            System.out.println("좌표 개수: " + (coordinates != null ? coordinates.size() : "null"));
-            
-            // === 1. 구역 기본 정보 저장 ===
-            System.out.println("=== CAD_AREA 테이블 저장 시도 ===");
-            cadAreaMapper.insertCadArea(areaData);
-            System.out.println("✅ CAD_AREA 저장 성공");
+            String drawingStatus = areaData.getDrawingStatus();
 
-            // === 2. 생성된 구역 ID 조회 ===
-            System.out.println("=== 생성된 AREA_ID 조회 시도 ===");
-            String newAreaId = cadAreaMapper.getLastInsertedAreaId();
-            System.out.println("생성된 AREA_ID: [" + newAreaId + "]");
-            
-            if (newAreaId == null || newAreaId.trim().isEmpty()) {
-                throw new RuntimeException("AREA_ID 생성 실패 - null 또는 빈 값");
-            }
+            if ("I".equals(drawingStatus)) {
+                // === 1. 구역 기본 정보 Insert ===
+                cadAreaMapper.insertCadArea(areaData);
 
-            // === 3. 좌표들 저장 ===
-            if (coordinates != null && !coordinates.isEmpty()) {
-                System.out.println("=== 좌표 저장 시작 (" + coordinates.size() + "개) ===");
-                
-                for (int i = 0; i < coordinates.size(); i++) {
-                    CADAreaDTO.CoordinatePoint coord = coordinates.get(i);
-                    coord.setAreaId(newAreaId);
-                    coord.setPointOrder(i + 1); // 1부터 시작하는 순서
-                    
-                    System.out.println("좌표 " + (i+1) + " 저장 시도:");
-                    System.out.println("  - areaId: [" + coord.getAreaId() + "]");
-                    System.out.println("  - pointOrder: [" + coord.getPointOrder() + "]");
-                    System.out.println("  - x: [" + coord.getX() + "] (타입: double)");
-                    System.out.println("  - y: [" + coord.getY() + "] (타입: double)");
-                    
-                    try {
+                // === 2. 생성된 구역 ID 조회 ===
+                String newAreaId = cadAreaMapper.getLastInsertedAreaId();
+                if (newAreaId == null || newAreaId.trim().isEmpty()) {
+                    throw new RuntimeException("AREA_ID 생성 실패");
+                }
+
+                // === 3. 좌표 저장 ===
+                List<CADAreaDTO.CoordinatePoint> coordinates = areaData.getCoordinates();
+                if (coordinates != null && !coordinates.isEmpty()) {
+                    for (int i = 0; i < coordinates.size(); i++) {
+                        CADAreaDTO.CoordinatePoint coord = coordinates.get(i);
+                        coord.setAreaId(newAreaId);
+                        coord.setPointOrder(i + 1);
                         cadAreaMapper.insertCadAreaCoord(coord);
-                        System.out.println("✅ 좌표 " + (i+1) + " 저장 성공");
-                    } catch (Exception coordEx) {
-                        System.out.println("❌ 좌표 " + (i+1) + " 저장 실패: " + coordEx.getMessage());
-                        coordEx.printStackTrace();
-                        throw coordEx; // 예외 재전파
                     }
                 }
-                System.out.println("✅ 모든 좌표 저장 완료");
+
+                return newAreaId;
             } else {
-                System.out.println("⚠️ 저장할 좌표 없음");
+                System.out.println("⚠️ DrawingStatus가 'I'가 아니므로 Insert 생략: " + drawingStatus);
+                return null;
             }
 
-            System.out.println("=== 구역 저장 완료 - AREA_ID: " + newAreaId + " ===");
-            return newAreaId;
-
         } catch (Exception e) {
-            System.out.println("=== 구역 저장 실패 상세 정보 ===");
-            System.out.println("Error Message: " + e.getMessage());
-            System.out.println("Error Class: " + e.getClass().getSimpleName());
             e.printStackTrace();
-            
-            throw new RuntimeException("구역 저장 중 오류가 발생했습니다: " + e.getMessage(), e);
+            throw new RuntimeException("구역 저장 중 오류 발생: " + e.getMessage(), e);
         }
     }
+
 
     /**
      * 모델 ID로 구역 목록 조회 (좌표 포함)
