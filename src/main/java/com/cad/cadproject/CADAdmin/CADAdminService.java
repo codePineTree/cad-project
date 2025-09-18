@@ -387,5 +387,22 @@ public class CADAdminService {
         }
     }
 
- 
+    public boolean cleanupTempDxfFile(String fileName) {
+        try {
+            File tempDir = new File(TEMP_DIR);
+            String tempDxfName = fileName.replaceAll("(?i)\\.dwf$", ".dxf");
+            File tempDxfFile = new File(tempDir, tempDxfName);
+            
+            if (tempDxfFile.exists()) {
+                boolean deleted = tempDxfFile.delete();
+                System.out.println("임시 파일 삭제: " + tempDxfName + " -> " + deleted);
+                return deleted;
+            }
+            return false;
+            
+        } catch (Exception e) {
+            System.err.println("임시 파일 삭제 오류: " + e.getMessage());
+            return false;
+        }
+    }
 }

@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -85,4 +86,23 @@ public class CADAdminController {
             return ResponseEntity.status(500).body("파일 체크 중 오류 발생: " + e.getMessage());
         }
     }
+    @DeleteMapping("/cleanupTempFile")
+    public ResponseEntity<Map<String, Object>> cleanupTempFile(@RequestParam("fileName") String fileName) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            boolean deleted = cadAdminService.cleanupTempDxfFile(fileName);
+            
+            response.put("success", deleted);
+            response.put("message", deleted ? "임시 파일 삭제 완료" : "삭제할 파일이 없음");
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "임시 파일 삭제 중 오류: " + e.getMessage());
+            
+            return ResponseEntity.badRequest().body(response);
+        }
+    } 
 }
