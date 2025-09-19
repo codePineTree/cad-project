@@ -104,5 +104,29 @@ public class CADAdminController {
             
             return ResponseEntity.badRequest().body(response);
         }
-    } 
+    }
+    @DeleteMapping("/deleteFile")
+    public ResponseEntity<?> deleteFile(@RequestParam("fileName") String fileName) {
+        try {
+            boolean deleted = cadAdminService.deleteFile(fileName);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", deleted);
+            
+            if (deleted) {
+                response.put("message", "파일 삭제 완료");
+            } else {
+                response.put("message", "파일이 존재하지 않거나 삭제 실패");
+            }
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "파일 삭제 중 오류: " + e.getMessage());
+            
+            return ResponseEntity.status(500).body(errorResponse);
+        }
+    }   
 }

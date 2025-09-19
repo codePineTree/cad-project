@@ -405,4 +405,28 @@ public class CADAdminService {
             return false;
         }
     }
+ // 파일 삭제 메서드 추가
+    public boolean deleteFile(String fileName) {
+        try {
+            File uploadDir = new File(UPLOAD_DIR);
+            File file = new File(uploadDir, fileName);
+            
+            System.out.println("파일 삭제 시도: " + file.getAbsolutePath());
+            System.out.println("파일 존재 여부: " + file.exists());
+            
+            if (file.exists()) {
+                boolean deleted = file.delete();
+                System.out.println("파일 삭제 결과: " + deleted);
+                return deleted;
+            } else {
+                System.out.println("삭제할 파일이 존재하지 않음: " + fileName);
+                return false;
+            }
+            
+        } catch (Exception e) {
+            System.err.println("파일 삭제 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }    
 }
