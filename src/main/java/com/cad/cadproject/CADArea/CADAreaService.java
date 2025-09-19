@@ -41,6 +41,21 @@ public class CADAreaService {
                 System.out.println(">>> INSERT 완료 - 새 AreaId: " + newAreaId);
                 return newAreaId;
 
+            } else if ("U".equals(drawingStatus)) {
+                // === UPDATE 로직 ===  
+                String areaId = areaData.getAreaId();
+                if (areaId == null || areaId.trim().isEmpty()) {
+                    throw new RuntimeException("수정할 AREA_ID가 없습니다");
+                }
+                
+                System.out.println(">>> UPDATE 구역 수정 - AreaId: " + areaId);
+                
+                // 구역 정보만 업데이트 (좌표는 수정하지 않음)
+                cadAreaMapper.updateCadArea(areaData);
+                
+                System.out.println(">>> UPDATE 완료 - AreaId: " + areaId);
+                return areaId;
+
             } else if ("D".equals(drawingStatus)) {
                 // === DELETE 로직 ===
                 String areaId = areaData.getAreaId();
