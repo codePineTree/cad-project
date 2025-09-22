@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CADAreaService {
@@ -197,5 +199,55 @@ public class CADAreaService {
         }
 
         return Math.abs(area / 2.0);
+    }
+    /**
+     * 모델별 구역 목록 조회 (페이징)
+     * @param modelId 모델 ID
+     * @param page 페이지 번호 (1부터 시작)
+     * @param size 페이지 크기 (기본 5)
+     * @return 페이징된 구역 목록
+     */
+    public Map<String, Object> getAreaListByModelId(String modelId, int page, int size) {
+        try {
+            // 기본값 설정
+            if (page < 1) page = 1;
+            if (size < 1) size = 5;
+            
+            int offset = (page - 1) * size;
+            
+            System.out.println("=== 구역 목록 조회 (페이징) ===");
+            System.out.println("ModelId: " + modelId + ", Page: " + page + ", Size: " + size);
+            
+            // 총 개수 조회
+            int totalCount = cadAreaMapper.getTotalAreaCountByModelId(modelId);
+            System.out.println("총 구역 개수: " + totalCount);
+            
+            // 구역 목록 조회
+            List<CADAreaDTO> areas = cadAreaMapper.selectAreaListByModelId(modelId, offset, size);
+            System.out.println("조회된 구역 개수: " + areas.size());
+            
+            // 페이징 정보 계산
+            int totalPages = (int) Math.ceil((double) totalCount / size);
+            boolean hasNext = page < totalPages;
+            boolean hasPrevious = page > 1;
+            
+            // 응답 데이터 구성
+            Map<String, Object> result = new HashMap<>();
+            result.put("areas", areas);
+            result.put("totalCount", totalCount);
+            result.put("currentPage", page);
+            result.put("pageSize", size);
+            result.put("totalPages", totalPages);
+            result.put("hasNext", hasNext);
+            result.put("hasPrevious", hasPrevious);
+            
+            System.out.println("=== 구역 목록 조회 완료 ===");
+            return result;
+            
+        } catch (Exception e) {
+            System.out.println("=== 구역 목록 조회 실패 ===");
+            e.printStackTrace();
+            throw new RuntimeException("구역 목록 조회 중 오류가 발생했습니다: " + e.getMessage(), e);
+        }
     }
 }

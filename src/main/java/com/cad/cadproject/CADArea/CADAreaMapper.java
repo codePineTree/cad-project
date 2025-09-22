@@ -91,4 +91,24 @@ public interface CADAreaMapper {
      * @param modelId 모델 ID
      */
     void deleteAreasByModelId(@Param("modelId") String modelId);
+    
+    /**
+     * 모델별 구역 목록 조회 (페이징)
+     * @param modelId 모델 ID
+     * @param offset 시작 위치
+     * @param limit 조회 개수
+     * @return 구역 목록
+     */
+    List<CADAreaDTO> selectAreaListByModelId(
+        @Param("modelId") String modelId,
+        @Param("offset") int offset,
+        @Param("limit") int limit
+    );
+
+    /**
+     * 모델별 구역 총 개수 조회
+     * @param modelId 모델 ID
+     * @return 총 구역 개수
+     */
+    int getTotalAreaCountByModelId(@Param("modelId") String modelId);
 }

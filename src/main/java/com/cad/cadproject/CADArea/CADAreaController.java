@@ -78,7 +78,7 @@ public class CADAreaController {
     }
 
     /**
-     * 모델별 구역 조회 API
+     * 모델별 구역 조회 API (기존 기능 - 좌표 포함)
      * @param modelId CAD 모델 ID
      * @return 해당 모델의 모든 구역 정보 (좌표 포함)
      */
@@ -98,6 +98,39 @@ public class CADAreaController {
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "구역 조회 중 오류가 발생했습니다: " + e.getMessage());
+            
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    /**
+     * 모델별 구역 목록 조회 API (페이징) - 새로운 기능
+     * Sidebar용 구역리스트 조회 (구역명만, 페이징 처리)
+     * @param modelId CAD 모델 ID
+     * @param page 페이지 번호 (기본값: 1)
+     * @param size 페이지 크기 (기본값: 5)
+     * @return 페이징된 구역 목록 (구역명만)
+     */
+    @GetMapping("/names/{modelId}")
+    public ResponseEntity<Map<String, Object>> getAreaNamesByModel(
+            @PathVariable String modelId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            Map<String, Object> result = cadAreaService.getAreaListByModelId(modelId, page, size);
+            
+            response.put("success", true);
+            response.put("data", result);
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "구역 목록 조회 중 오류가 발생했습니다: " + e.getMessage());
             
             return ResponseEntity.badRequest().body(response);
         }
@@ -134,6 +167,4 @@ public class CADAreaController {
             return ResponseEntity.badRequest().body(response);
         }
     }
-
-
 }

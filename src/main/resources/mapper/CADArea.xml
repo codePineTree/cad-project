@@ -166,4 +166,30 @@ DELETE FROM CAD_AREA
 WHERE MODEL_ID = #{modelId}
 </delete>
 
+<!-- 모델별 구역 목록 조회 (페이징) -->
+<!-- 모델별 구역 목록 조회 (페이징) - Oracle 버전 -->
+<select id="selectAreaListByModelId" resultType="com.cad.cadproject.CADArea.CADAreaDTO">
+    SELECT 
+        areaId,
+        modelId,
+        areaNm
+    FROM (
+        SELECT 
+            AREA_ID as areaId,
+            MODEL_ID as modelId,
+            AREA_NM as areaNm,
+            ROW_NUMBER() OVER (ORDER BY REG_DDTM DESC) as rn
+        FROM CAD_AREA 
+        WHERE MODEL_ID = #{modelId}
+    ) sub
+    WHERE sub.rn &gt; #{offset} AND sub.rn &lt;= (#{offset} + #{limit})
+</select>
+
+<!-- 모델별 구역 총 개수 조회 -->
+<select id="getTotalAreaCountByModelId" parameterType="String" resultType="int">
+    SELECT COUNT(*)
+    FROM CAD_AREA 
+    WHERE MODEL_ID = #{modelId}
+</select>
+
 </mapper>
