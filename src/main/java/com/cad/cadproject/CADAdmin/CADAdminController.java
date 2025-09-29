@@ -1,6 +1,7 @@
 package com.cad.cadproject.CADAdmin;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -127,6 +128,20 @@ public class CADAdminController {
             errorResponse.put("message", "파일 삭제 중 오류: " + e.getMessage());
             
             return ResponseEntity.status(500).body(errorResponse);
+        }
+    }
+    @PostMapping("/parseWithAspose")
+    public ResponseEntity<?> parseWithAspose(@RequestBody Map<String, String> request) {
+        try {
+            String fileName = request.get("fileName");
+            System.out.println("parseWithAspose 호출 - 파일명: " + fileName);
+            
+            Map<String, Object> result = cadAdminService.parseCadFileWithAspose(fileName);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getMessage()));
         }
     }   
 }
